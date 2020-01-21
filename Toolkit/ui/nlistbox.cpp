@@ -98,23 +98,16 @@ void NListBox::setSelectedIndex(int value)
     if (value < 0 && m_items->count() <= value)    
         value = -1;    
 
-    if (value == m_selectedIndex)
-        return;
+    if (value == m_selectedIndex) return;
+
+    if(m_selectedIndex > -1) m_widgets.at(m_selectedIndex)->unhighlight();
+    if(value > -1) m_widgets.at(value)->highlight();
 
     m_selectedIndex = value;
     emit changedSelectedIndex(value);
     emit changedSelectedItem(getSelectedItem());
     emit anythingSelected(m_selectedIndex >= 0);
 
-    //Updating visuals
-    for(int i =0; i<m_widgets.count(); i++)
-    {
-        ClickableWidget *w = m_widgets.at(i);
-        if (i != m_selectedIndex)        
-            w->unhighlight();        
-        else        
-            w->highlight();        
-    }
 }
 
 int NListBox::getSelectedIndex()

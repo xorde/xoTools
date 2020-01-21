@@ -43,14 +43,11 @@ public:
     Q_INVOKABLE void setOrientation(Qt::Orientation value);
     Q_INVOKABLE Qt::Orientation getOrientation();
 
-
-
     void setTransparentBackground();
 
     void setBackground(QColor color);
 
     void setBackgroundAndBorder(QColor backgroundColor, quint8 borderThickness, QColor borderColor);
-
 
 signals:
     Q_SIGNAL void itemsChanged(ObservableCollection* value);
@@ -66,6 +63,7 @@ signals:
 
 public slots:
     void rebuild();
+
 protected:
     ObservableCollection* m_items = nullptr;
     QList<ClickableWidget*> m_widgets;
@@ -74,6 +72,7 @@ protected:
     QWidget* m_uiSpacer = nullptr;
     int m_selectedIndex = -1;
     Qt::Orientation m_orientation = Qt::Vertical;
+
 protected slots:
     void itemClicked(int clicks);
     void onItemsCountChanged(int count);

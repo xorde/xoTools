@@ -166,9 +166,9 @@ protected:
     //! @param var Reference to variable to bind.
     //! @return reference to created object.
     template <class T>
-    ONBObject<T> &createInput(QString name, T &var)
+    ONBObject<T> &createInput(QString name, T &var, bool in_is_ba = false)
     {
-        ONBObject<T> &obj = ObjectInfo::create(name, var, ObjectInfo::Input);
+        ONBObject<T> &obj = ObjectInfo::create(name, var, ObjectInfo::Input, in_is_ba);
         bindObject(obj);
         return obj;
     }
@@ -180,9 +180,9 @@ protected:
     //! @param var Reference to variable to bind.
     //! @return reference to created object.
     template <class T>
-    ONBObject<T> &createOutput(QString name, T &var)
+    ONBObject<T> &createOutput(QString name, T &var, bool in_is_ba = false)
     {
-        ONBObject<T> &obj = ObjectInfo::create(name, var, ObjectInfo::Output);
+        ONBObject<T> &obj = ObjectInfo::create(name, var, ObjectInfo::Output,in_is_ba);
         bindObject(obj);
         return obj;
     }

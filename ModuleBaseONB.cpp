@@ -103,7 +103,7 @@ bool ModuleBaseONB::newComponent(uint32_t classID, QString name)
             QString newName;
             do
             {
-                newName = component->componentName + QString::number(++idx);
+                newName = component->m_componentName + QString::number(++idx);
             } while (isComponentExists(newName));
 
             component->m_instanceName = newName;

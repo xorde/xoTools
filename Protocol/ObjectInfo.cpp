@@ -29,8 +29,10 @@ QJsonObject ObjectInfo::createJsonInfo() const
 
 #ifdef _MSC_VER
 template<>
-ONBObject<QByteArray> &ObjectInfo::create(QString name, QByteArray &var, Flags flags, bool in_is_ba = false)
+ONBObject<QByteArray> &ObjectInfo::create(QString name, QByteArray &var, Flags flags, bool in_is_ba)
 {
+    Q_UNUSED(in_is_ba)
+
     ONBObject<QByteArray> *obj = new ONBObject<QByteArray>;
     unsigned short sz = 0;
     Type t = typeOfVar(var);

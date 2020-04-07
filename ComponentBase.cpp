@@ -1,19 +1,19 @@
 #include "ComponentBase.h"
+#include <QCryptographicHash>
 
-ComponentBase::ComponentBase(QObject *parent) : ComponentBase("GenericComponent", 0xF0000000, "", parent)
+ComponentBase::ComponentBase(QObject *parent) : ComponentBase("GenericComponent", "", parent)
 {
 }
 
-ComponentBase::ComponentBase(QString name, uint32_t classId, QString description, QObject *parent) :
+ComponentBase::ComponentBase(QString name, QString description, QObject *parent) :
     QObject(parent),
-    componentName(name),
-    classID(classId),
     description(description.isEmpty()? "<no description available>": description),
     version(reinterpret_cast<unsigned char*>(&m_version)[1]),
     versionMinor(reinterpret_cast<unsigned char*>(&m_version)[0])
 {
+    setName(name);
     // order of service objects is predefined by ONB (to be compatible with devices)
-    bindSvcObject(ObjectInfo::create("class", classID, ObjectInfo::ReadOnly));
+    bindSvcObject(ObjectInfo::create("class", m_classID, ObjectInfo::ReadOnly));
     bindSvcObject(ObjectInfo::create("name", m_instanceName)); // there will be instance name in the future...
     bindSvcObject(ObjectInfo::create("fullName", ComponentBase::description));
     bindSvcObject(ObjectInfo::create("serial", serialNumber, ObjectInfo::ReadOnly));
@@ -24,7 +24,7 @@ ComponentBase::ComponentBase(QString name, uint32_t classId, QString description
     bindSvcObject(ObjectInfo::create("objCount", m_objectCount, ObjectInfo::ReadOnly));
     // TODO: replace m_objectCount with m_objects.size() in the future
     bindSvcObject(ObjectInfo::create("busType", m_busType, ObjectInfo::ReadOnly));
-    bindSvcObject(ObjectInfo::create("className", componentName, ObjectInfo::ReadOnly));
+    bindSvcObject(ObjectInfo::create("className", m_componentName, ObjectInfo::ReadOnly));
     bindSvcObject(ObjectInfo::create("icon", m_iconData, ObjectInfo::ReadOnly));
 }
 
@@ -39,7 +39,7 @@ ComponentBase::~ComponentBase()
 
 uint32_t ComponentBase::timestamp() const
 {
-    return m_timestampTimer ? m_timestampTimer->elapsed(): 0;
+    return m_timestampTimer ? static_cast<uint32_t>(m_timestampTimer->elapsed()): 0;
 }
 
 void ComponentBase::sendObject(QString name)
@@ -58,9 +58,9 @@ QJsonObject ComponentBase::getJsonConfig() const
     QJsonObject obj;
     obj["id"] = QString::number(m_id);
     obj["name"] = m_instanceName;
-    obj["className"] = componentName;
+    obj["className"] = m_componentName;
     obj["descr"] = description;
-    obj["classID"] = QString::number(classID);
+    obj["classID"] = QString::number(m_classID);
     obj["serialNumber"] = QString::number(serialNumber);
     obj["version"] = QString::number(m_version);
     obj["releaseInfo"] = releaseInfo;
@@ -79,6 +79,7 @@ QJsonObject ComponentBase::getJsonConfig() const
         case ObjectInfo::Output:
             outputs.push_back(pInfo->createJsonInfo());
             break;
+        default:; // to eliminate warning
         }
     }
 
@@ -87,6 +88,16 @@ QJsonObject ComponentBase::getJsonConfig() const
     return obj;
 }
 
+void ComponentBase::setName(QString name)
+{
+    m_componentName = name;
+    QByteArray hash = QCryptographicHash::hash(name.toUtf8(), QCryptographicHash::Md5);
+    uint32_t cid = 0;
+    for (int i=0; i<4; i++)
+        cid ^= reinterpret_cast<uint32_t*>(hash.data())[i];
+    m_classID = cid;
+    //qDebug() << "HASH of" << name << "=" << cid;
+}
 
 void ComponentBase::setIcon(QImage icon)
 {

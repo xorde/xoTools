@@ -76,9 +76,9 @@ public:
     template<class T> void declareComponent(T *component)
     {
         ComponentBase *comp = static_cast<ComponentBase*>(component);
-        m_classes << comp->classID;
-        m_classInfo[comp->classID] = comp;
-        m_creators[comp->classID] = [=](QString name)
+        m_classes << comp->m_classID;
+        m_classInfo[comp->m_classID] = comp;
+        m_creators[comp->m_classID] = [=](QString name)
         {
             ComponentBase *c = new T;
             if (!name.isEmpty())

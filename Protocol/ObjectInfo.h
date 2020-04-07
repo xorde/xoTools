@@ -183,10 +183,10 @@ protected:
     //! @return The created object.
     //! @see ONBObject::createInput(), ONBObject::createOutput(), ONBObject::createSetting()
     template<typename T>
-    static ONBObject<T> &create(QString name, T &var, Flags flags=ReadWrite)
+    static ONBObject<T> &create(QString name, T &var, Flags flags=ReadWrite, bool in_is_ba =false)
     {
         ONBObject<T> *obj = new ONBObject<T>;
-        unsigned short sz = (unsigned short)sizeof(T);
+        unsigned short sz = in_is_ba ? 0 : (unsigned short)sizeof(T);
         Type t = typeOfVar(var);
         if (flags & Read)
         {
@@ -208,17 +208,17 @@ protected:
 #ifdef _MSC_VER
     //! @brief Byte array binding.
     //! @see Variable binding.
-    template<> static ONBObject<QByteArray> &create(QString name, QByteArray &var, Flags flags);
+    template<> static ONBObject<QByteArray> &create(QString name, QByteArray &var, Flags flags,bool in_is_ba);
 #endif
 
     //! @brief Array binding.
     //! Not supported yet.
     //! @see Variable binding.
     template<typename T, int N>
-    static ONBObject<T> &create(QString name, T (&var)[N], Flags flags=ReadWrite)
+    static ONBObject<T> &create(QString name, T (&var)[N], Flags flags=ReadWrite, bool in_is_ba =false)
     {
         ONBObject<T> *obj = new ONBObject<T>;
-        unsigned short sz = static_cast<unsigned short>(sizeof(T)) * N;
+        unsigned short sz = in_is_ba ? 0 : static_cast<unsigned short>(sizeof(T)) * N;
         Type t = typeOfVar(var[0]);
         if (flags & Read)
         {

@@ -67,7 +67,7 @@
 //! @code
 //! #include "Gain.h"
 //! Gain::Gain() :
-//!     ComponentBase("Gain", 0x12345678)
+//!     ComponentBase("Gain")
 //! {
 //!     description = "Basic amplifier with specified gain";
 //!     version = 1;
@@ -103,8 +103,8 @@ public:
     //! Creates component and binds service objects.
     explicit ComponentBase(QObject *parent = nullptr);
 
-    //! Construct the component with given name, classID and description.
-    ComponentBase(QString name, uint32_t classId, QString description = QString(), QObject *parent = nullptr);
+    //! Construct the component with given name and description.
+    ComponentBase(QString name, QString description = QString(), QObject *parent = nullptr);
 
     //! Deletes all its objects, including service objects.
     virtual ~ComponentBase();
@@ -130,10 +130,12 @@ signals:
     void objectChanged(QString name);
 
 protected:
-    //! The name of the component. Used to name the type, must be unique.
-    QString componentName;
-    //! ClassID of the component. Class identifier, must be unique. There is classification table (must be somewhere).
-    uint32_t classID = 0;
+    //! Set the name of the component. Used to name the type, must be unique.
+    void setName(QString name);
+//    //! The name of the component. Used to name the type, must be unique.
+//    QString componentName;
+//    //! ClassID of the component. Class identifier, must be unique. There is classification table (must be somewhere).
+//    uint32_t classID = 0;
     //! Human-readable description for the help.
     QString description;
     //! Component's serial number. This field commonly used in devices, contains unique number associated with a certain device.
@@ -166,9 +168,9 @@ protected:
     //! @param var Reference to variable to bind.
     //! @return reference to created object.
     template <class T>
-    ONBObject<T> &createInput(QString name, T &var)
+    ONBObject<T> &createInput(QString name, T &var, bool in_is_ba = false)
     {
-        ONBObject<T> &obj = ObjectInfo::create(name, var, ObjectInfo::Input);
+        ONBObject<T> &obj = ObjectInfo::create(name, var, ObjectInfo::Input, in_is_ba);
         bindObject(obj);
         return obj;
     }
@@ -180,9 +182,9 @@ protected:
     //! @param var Reference to variable to bind.
     //! @return reference to created object.
     template <class T>
-    ONBObject<T> &createOutput(QString name, T &var)
+    ONBObject<T> &createOutput(QString name, T &var, bool in_is_ba = false)
     {
-        ONBObject<T> &obj = ObjectInfo::create(name, var, ObjectInfo::Output);
+        ONBObject<T> &obj = ObjectInfo::create(name, var, ObjectInfo::Output,in_is_ba);
         bindObject(obj);
         return obj;
     }
@@ -292,6 +294,10 @@ protected:
 private:
     //! ComponentID of the component
     unsigned short m_id = 0;
+    //! The name of the component. Used to name the type, must be unique.
+    QString m_componentName;
+    //! ClassID of the component. Class identifier, must be unique. There is classification table (must be somewhere).
+    uint32_t m_classID = 0;
     //! Object dictionary
     QList<ObjectInfo*> m_objects;
     //! Object access by name

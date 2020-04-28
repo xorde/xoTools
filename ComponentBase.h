@@ -9,7 +9,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QElapsedTimer>
-#include "Protocol/onbobject.h"
+#include "Protocol/ObjectInfo.h"
 #include "Protocol/ONBPacket.h"
 #include "xotools_global.h"
 #include <QDebug>
@@ -137,19 +137,19 @@ protected:
 //    //! ClassID of the component. Class identifier, must be unique. There is classification table (must be somewhere).
 //    uint32_t classID = 0;
     //! Human-readable description for the help.
-    QString description;
+    xoString description;
     //! Component's serial number. This field commonly used in devices, contains unique number associated with a certain device.
-    uint32_t serialNumber = 0;
+    xoUInt32 serialNumber;
     //! Major version of the component.
     unsigned char &version;
     //! Minor version of the component.
     unsigned char &versionMinor;
     //! This field can be filled with arbitrary information about component release (e.g. build date and time, release number etc.).
-    QString releaseInfo;
+    xoString releaseInfo;
     //! This field commonly used in devices. Can contain CPU description or something else about hardware.
-    QString hardwareInfo;
+    xoString hardwareInfo;
     //! Historical thing from devices. Indicates how many times the device burned out. ]:->
-    uint32_t burnCount = 0;
+    xoUInt32 burnCount;
 
     //! @brief Set an icon to the component.
     //! @details Component icon is used in the UI.
@@ -168,9 +168,10 @@ protected:
     //! @param var Reference to variable to bind.
     //! @return reference to created object.
     template <class T>
-    ONBObject<T> &createInput(QString name, T &var, bool in_is_ba = false)
+    xoObject<T> &createInput(QString name, xoObject<T> &obj)
     {
-        ONBObject<T> &obj = ObjectInfo::create(name, var, ObjectInfo::Input, in_is_ba);
+        obj.m_description.name = name;
+        obj.m_description.flags |= ObjectBase::Input;
         bindObject(obj);
         return obj;
     }
@@ -182,9 +183,10 @@ protected:
     //! @param var Reference to variable to bind.
     //! @return reference to created object.
     template <class T>
-    ONBObject<T> &createOutput(QString name, T &var, bool in_is_ba = false)
+    xoObject<T> &createOutput(QString name, xoObject<T> &obj)
     {
-        ONBObject<T> &obj = ObjectInfo::create(name, var, ObjectInfo::Output,in_is_ba);
+        obj.m_description.name = name;
+        obj.m_description.flags |= ObjectBase::Output;
         bindObject(obj);
         return obj;
     }
@@ -196,9 +198,10 @@ protected:
     //! @param var Reference to variable to bind.
     //! @return reference to created object.
     template <class T>
-    ONBObject<T> &createSetting(QString name, T &var)
+    xoObject<T> &createSetting(QString name, xoObject<T> &obj)
     {
-        ONBObject<T> &obj = ObjectInfo::create(name, var, ObjectInfo::Setting);
+        obj.m_description.name = name;
+        obj.m_description.flags |= ObjectBase::Setting;
         bindObject(obj);
         return obj;
     }
@@ -209,7 +212,7 @@ protected:
     //! You can cast it manually to const ONBObject<T>* where T must match the type of bound variable.
     //! @param name The object name.
     //! @return A constant pointer to the object. If an object with given name does not exist, nullptr is returned.
-    const ObjectInfo *object(QString name) const;
+    const ObjectBase *object(QString name) const;
 
     //! @brief Rebind the existing object to another variable.
     //! @details Use this method if the bound variable is moved or reallocated.
@@ -218,13 +221,16 @@ protected:
     //! @param var Reference to variable to bind.
     //! @return true if rebind was successful, false if object does not exist.
     template <class T>
-    bool rebindObject(QString name, T &var)
+    bool rebindObject(QString name, xoObject<T> &obj)
     {
-        ObjectInfo *obj = m_objectMap.value(name, nullptr);
-        if (obj)
+        xoObject<T> *oldObj = dynamic_cast<xoObject<T>*>(m_objectMap.value(name, nullptr));
+        if (oldObj)
         {
-            if (obj->rebind(var))
-                sendObjectInfo(obj->description().id);
+            int oid = oldObj->description().id;
+            obj.copyInfoFrom(*oldObj);
+            m_objects[oid] = &static_cast<ObjectBase&>(obj);
+            m_objectMap[name] = &static_cast<ObjectBase&>(obj);
+            sendObjectInfo(oid);
             return true;
         }
         return false;
@@ -295,23 +301,23 @@ private:
     //! ComponentID of the component
     unsigned short m_id = 0;
     //! The name of the component. Used to name the type, must be unique.
-    QString m_componentName;
+    xoString m_componentName;
     //! ClassID of the component. Class identifier, must be unique. There is classification table (must be somewhere).
-    uint32_t m_classID = 0;
+    xoUInt32 m_classID;
     //! Object dictionary
-    QList<ObjectInfo*> m_objects;
+    QList<ObjectBase*> m_objects;
     //! Object access by name
-    QMap<QString, ObjectInfo*> m_objectMap;
+    QMap<QString, ObjectBase*> m_objectMap;
     //! Service object dictionary
-    QList<ObjectInfo*> m_svcObjects;
+    QList<ObjectBase*> m_svcObjects;
     //! duplicates m_objects.count() because methods invokation isn't supported yet
-    unsigned char m_objectCount;
+    xoUInt8 m_objectCount; //! @todo: make the possible number of objects more than 256, everywhere...
 
     //! map of timers for object auto-sending, accessed by ObjectID
     QMap<unsigned char, QTimer*> m_autoSendTimers;
 
     //! create binding for service object
-    unsigned char bindSvcObject(ObjectInfo &obj);
+    unsigned char bindSvcObject(QString name, ObjectBase &obj, ObjectBase::Flags flags);
 
     void parseServiceMessage(unsigned char oid, const QByteArray &data);
     void parseGlobalServiceMessage(unsigned char aid);
@@ -322,14 +328,14 @@ private:
     void sendSvcObject(unsigned char oid);
     void sendObjectInfo(unsigned char oid);
 
-    unsigned char bindObject(ObjectInfo &obj);    
+    unsigned char bindObject(ObjectBase &obj);
     void setId(unsigned short id) {m_id = id;}
 
     bool m_created = false;
-    QString m_instanceName = "";
-    unsigned short m_version = 0;
-    unsigned char m_busType = 0;
-    QByteArray m_iconData;
+    xoString m_instanceName;
+    xoUInt16 m_version;
+    xoUInt8 m_busType;
+    xoByteArray m_iconData;
 
     friend class ModuleBaseONB;
 

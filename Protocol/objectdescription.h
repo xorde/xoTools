@@ -39,9 +39,28 @@ public:
     ObjectDescriptionHeaderV2();
 };
 
+//! @brief ONB Object description header, version 3.
+//! @details Contains extended flags for meta-value exchange.
+class ObjectDescriptionHeaderV3
+{
+public:
+    unsigned char id;           //!< Object ID
+    unsigned char version: 4;   //!< Version of the descriptor (current version = 3)
+    unsigned char _verid: 4;    //!< Distinction of descriptor version >= 2 (must be equal to 0xF)
+    unsigned char group;        //!< Object ID category
+    unsigned char _reserve;     //!< Not used, reserved for future
+    unsigned char flags;        //!< Access flags from Flags enum
+    unsigned short extFlags;    //!< Advanced flags (min max def) from ExtFlags enum
+    unsigned char type;         //!< Type of the object (Type enum)
+    unsigned short size;        //!< Size of the object to read or write in bytes.
+    // @todo: unsigned short count;       //!< count of values in array
+
+    ObjectDescriptionHeaderV3();
+};
+
 //! @brief ONB Object description.
 //! @details Contains header and name of the Object.
-class XOTOOLSSHARED_EXPORT ObjectDescription : public ObjectDescriptionHeaderV2
+class XOTOOLSSHARED_EXPORT ObjectDescription : public ObjectDescriptionHeaderV3
 {
 private:
     inline unsigned char swapRWflags(unsigned char f) {return (f & 0xF9) | ((f & 2) << 1) | ((f & 4) >> 1);}

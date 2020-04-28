@@ -8,32 +8,38 @@ ComponentBase::ComponentBase(QObject *parent) : ComponentBase("GenericComponent"
 ComponentBase::ComponentBase(QString name, QString description, QObject *parent) :
     QObject(parent),
     description(description.isEmpty()? "<no description available>": description),
+    serialNumber(0),
     version(reinterpret_cast<unsigned char*>(&m_version)[1]),
-    versionMinor(reinterpret_cast<unsigned char*>(&m_version)[0])
+    versionMinor(reinterpret_cast<unsigned char*>(&m_version)[0]),
+    burnCount(0),
+    m_classID(0),
+    m_objectCount(0),
+    m_version(0),
+    m_busType(0)
 {
     setName(name);
     // order of service objects is predefined by ONB (to be compatible with devices)
-    bindSvcObject(ObjectInfo::create("class", m_classID, ObjectInfo::ReadOnly));
-    bindSvcObject(ObjectInfo::create("name", m_instanceName)); // there will be instance name in the future...
-    bindSvcObject(ObjectInfo::create("fullName", ComponentBase::description));
-    bindSvcObject(ObjectInfo::create("serial", serialNumber, ObjectInfo::ReadOnly));
-    bindSvcObject(ObjectInfo::create("version", m_version, ObjectInfo::ReadOnly));
-    bindSvcObject(ObjectInfo::create("buildDate", releaseInfo, ObjectInfo::ReadOnly));
-    bindSvcObject(ObjectInfo::create("cpuInfo", hardwareInfo, ObjectInfo::ReadOnly));
-    bindSvcObject(ObjectInfo::create("burnCount", burnCount));
-    bindSvcObject(ObjectInfo::create("objCount", m_objectCount, ObjectInfo::ReadOnly));
-    // TODO: replace m_objectCount with m_objects.size() in the future
-    bindSvcObject(ObjectInfo::create("busType", m_busType, ObjectInfo::ReadOnly));
-    bindSvcObject(ObjectInfo::create("className", m_componentName, ObjectInfo::ReadOnly));
-    bindSvcObject(ObjectInfo::create("icon", m_iconData, ObjectInfo::ReadOnly));
+    bindSvcObject("class", m_classID, ObjectBase::ReadOnly);
+    bindSvcObject("name", m_instanceName, ObjectBase::ReadWrite); // there will be instance name in the future...
+    bindSvcObject("fullName", ComponentBase::description, ObjectBase::ReadWrite);
+    bindSvcObject("serial", serialNumber, ObjectBase::ReadOnly);
+    bindSvcObject("version", m_version, ObjectBase::ReadOnly);
+    bindSvcObject("buildDate", releaseInfo, ObjectBase::ReadOnly);
+    bindSvcObject("cpuInfo", hardwareInfo, ObjectBase::ReadOnly);
+    bindSvcObject("burnCount", burnCount, ObjectBase::ReadWrite);
+    bindSvcObject("objCount", m_objectCount, ObjectBase::ReadOnly);
+    //! @todo replace m_objectCount with m_objects.size() in the future
+    bindSvcObject("busType", m_busType, ObjectBase::ReadOnly);
+    bindSvcObject("className", m_componentName, ObjectBase::ReadOnly);
+    bindSvcObject("icon", m_iconData, ObjectBase::ReadOnly);
 }
 
 ComponentBase::~ComponentBase()
 {
     //qDebug() << "[ComponentBase] deleted" << componentName;
-    for (ObjectInfo *obj: m_objects)
+    for (ObjectBase *obj: m_objects)
         delete obj;
-    for (ObjectInfo *obj: m_svcObjects)
+    for (ObjectBase *obj: m_svcObjects)
         delete obj;
 }
 
@@ -44,7 +50,7 @@ uint32_t ComponentBase::timestamp() const
 
 void ComponentBase::sendObject(QString name)
 {
-    ObjectInfo *obj = m_objectMap.value(name, nullptr);
+    ObjectBase *obj = m_objectMap.value(name, nullptr);
     if (obj)
     {
         QByteArray ba;
@@ -57,26 +63,26 @@ QJsonObject ComponentBase::getJsonConfig() const
 {
     QJsonObject obj;
     obj["id"] = QString::number(m_id);
-    obj["name"] = m_instanceName;
-    obj["className"] = m_componentName;
-    obj["descr"] = description;
+    obj["name"] = m_instanceName.value();
+    obj["className"] = m_componentName.value();
+    obj["descr"] = description.value();
     obj["classID"] = QString::number(m_classID);
     obj["serialNumber"] = QString::number(serialNumber);
     obj["version"] = QString::number(m_version);
-    obj["releaseInfo"] = releaseInfo;
-    obj["hardwareInfo"] = hardwareInfo;
+    obj["releaseInfo"] = releaseInfo.value();
+    obj["hardwareInfo"] = hardwareInfo.value();
 
     QJsonArray inputs, outputs;
-    for (ObjectInfo* pInfo : m_objects)
+    for (ObjectBase* pInfo : m_objects)
     {
         if (!pInfo)
             continue;
         switch(pInfo->flags())
         {
-        case ObjectInfo::Input:
+        case ObjectBase::Input:
             inputs.push_back(pInfo->createJsonInfo());
             break;
-        case ObjectInfo::Output:
+        case ObjectBase::Output:
             outputs.push_back(pInfo->createJsonInfo());
             break;
         default:; // to eliminate warning
@@ -119,10 +125,10 @@ void ComponentBase::setIcon(QString filename)
 
 bool ComponentBase::renameObject(QString oldName, QString newName)
 {
-    ObjectInfo *obj = m_objectMap.value(oldName, nullptr);
+    ObjectBase *obj = m_objectMap.value(oldName, nullptr);
     if (obj)
     {
-        obj->mDesc.name = newName;
+        obj->m_description.name = newName;
         m_objectMap.remove(oldName);
         m_objectMap[newName] = obj;
         sendObjectInfo(obj->description().id);
@@ -133,7 +139,7 @@ bool ComponentBase::renameObject(QString oldName, QString newName)
 
 bool ComponentBase::deleteObject(QString name)
 {
-    ObjectInfo *obj = m_objectMap.value(name, nullptr);
+    ObjectBase *obj = m_objectMap.value(name, nullptr);
     if (obj)
     {
         m_objects.removeAt(obj->description().id);
@@ -147,22 +153,22 @@ bool ComponentBase::deleteObject(QString name)
     return false;
 }
 
-const ObjectInfo *ComponentBase::object(QString name) const
+const ObjectBase *ComponentBase::object(QString name) const
 {
     return m_objectMap.value(name, nullptr);
 }
 
 void ComponentBase::touchOutput(QString name, bool notifyAnyway)
 {
-    ObjectInfo *obj = m_objectMap.value(name, nullptr);
+    ObjectBase *obj = m_objectMap.value(name, nullptr);
     if (obj)
     {
-        if (!obj->m_extInfo.autoPeriodMs || notifyAnyway)
+        if (!obj->m_autoPeriodMs || notifyAnyway)
         {
             QByteArray ba;
             obj->read(ba);
             sendMessage(obj->description().id, ba);
-            qDebug() << "msg sent" << obj->name() << obj->m_extInfo.autoPeriodMs;
+            qDebug() << "msg sent" << obj->name() << obj->m_autoPeriodMs;
         }
         else
         {
@@ -176,14 +182,16 @@ void ComponentBase::log(QString message)
     sendServiceMessage(svcMessage, message.toUtf8());
 }
 
-unsigned char ComponentBase::bindSvcObject(ObjectInfo &obj)
+unsigned char ComponentBase::bindSvcObject(QString name, ObjectBase &obj, ObjectBase::Flags flags)
 {
+    obj.m_description.name = name;
+    obj.m_description.flags |= flags;
     m_svcObjects << &obj;
     obj.setId(m_svcObjects.size() - 1);
     return obj.description().id;
 }
 
-unsigned char ComponentBase::bindObject(ObjectInfo &obj)
+unsigned char ComponentBase::bindObject(ObjectBase &obj)
 {
     m_objects << &obj;
     obj.setId(m_objects.size() - 1);
@@ -270,7 +278,7 @@ void ComponentBase::parseServiceMessage(unsigned char oid, const QByteArray &dat
       case svcObjectHint:
       case svcObjectUnit:
       case svcObjectOptions:
-      case svcObjectExtInfo:
+//      case svcObjectExtInfo:
       case svcObjectEnum:
       {
         unsigned char _oid = data[0];
@@ -279,8 +287,8 @@ void ComponentBase::parseServiceMessage(unsigned char oid, const QByteArray &dat
         {
             QByteArray ba;
             ba.append(_oid);
-            ObjectInfo *obj = m_objects[_oid];
-            obj->readMeta(ba, static_cast<ObjectInfo::MetaValue>(metavalue));
+            ObjectBase *obj = m_objects[_oid];
+            obj->readMeta(ba, static_cast<ObjectBase::MetaValue>(metavalue));
             sendServiceMessage(oid, ba);
         }
       } break;
@@ -302,17 +310,17 @@ void ComponentBase::parseServiceMessage(unsigned char oid, const QByteArray &dat
             unsigned char _oid = data[4];
             if (_oid < m_objects.size() && m_objects[_oid])
             {
-                ObjectInfo *obj = m_objects[_oid];
+                ObjectBase *obj = m_objects[_oid];
                 int period = *reinterpret_cast<const int*>(data.data());
                 if (period >= 0)
-                    obj->m_extInfo.autoPeriodMs = period;
+                    obj->m_autoPeriodMs = period;
                 else
-                    obj->m_extInfo.autoPeriodMs = obj->m_extInfo.RMIP;
+                    obj->m_autoPeriodMs = obj->m_RMIP;
                 obj->m_changed = true;
                 if (oid == svcTimedRequest)
-                    obj->m_extInfo.needTimestamp = true;
+                    obj->m_needTimestamp = true;
 
-                if (obj->m_extInfo.autoPeriodMs > 0)
+                if (obj->m_autoPeriodMs > 0)
                 {
                     QTimer *timer = m_autoSendTimers.value(_oid, nullptr);
                     if (!timer)
@@ -321,8 +329,8 @@ void ComponentBase::parseServiceMessage(unsigned char oid, const QByteArray &dat
                         m_autoSendTimers[_oid] = timer;
                         connect(timer, &QTimer::timeout, this, [_oid, this]()
                         {
-                            ObjectInfo *obj = this->m_objects[_oid];
-                            if (obj->m_extInfo.needTimestamp)
+                            ObjectBase *obj = this->m_objects[_oid];
+                            if (obj->m_needTimestamp)
                             {
                                 uint32_t timestamp = m_timestampTimer? m_timestampTimer->elapsed(): 0;
                                 QByteArray ba;
@@ -345,7 +353,7 @@ void ComponentBase::parseServiceMessage(unsigned char oid, const QByteArray &dat
                             }
                         });
                     }
-                    timer->setInterval(obj->m_extInfo.autoPeriodMs);
+                    timer->setInterval(obj->m_autoPeriodMs);
                     timer->start();
                 }
                 else
@@ -385,7 +393,7 @@ void ComponentBase::parseServiceMessage(unsigned char oid, const QByteArray &dat
         uint32_t timestamp = *reinterpret_cast<const uint32_t*>(data.data() + 2);
         if (_oid < m_objects.size())
         {
-            ObjectInfo *obj = m_objects[_oid];
+            ObjectBase *obj = m_objects[_oid];
             if (obj)
             {
                 obj->m_timestamp = timestamp;
@@ -405,7 +413,7 @@ void ComponentBase::parseServiceMessage(unsigned char oid, const QByteArray &dat
             unsigned char local_oid = data[i];
             if (local_oid >= m_objects.size())
                 continue;
-            ObjectInfo *obj = m_objects[local_oid];
+            ObjectBase *obj = m_objects[local_oid];
             if (obj)
             {
                 ba.append(local_oid);
@@ -436,7 +444,7 @@ void ComponentBase::parseMessage(unsigned char oid, const QByteArray &data)
 {
     if (oid < m_objects.size())
     {
-        ObjectInfo *obj = m_objects[oid];
+        ObjectBase *obj = m_objects[oid];
         if (!obj)
             return;
         if (data.size()) // write
@@ -452,7 +460,7 @@ void ComponentBase::parseMessage(unsigned char oid, const QByteArray &data)
 //            else if (obj.isStorable())
 //                objnetStorage()->save(obj);
         }
-        if (!data.size() || obj->isDual())
+        if (!data.size())
         {
             objectRequestEvent(obj->name());
             QByteArray ba;
@@ -484,7 +492,7 @@ void ComponentBase::sendMessage(unsigned char oid, const QByteArray &data)
 
 void ComponentBase::sendSvcObject(unsigned char oid)
 {
-    ObjectInfo *obj = m_svcObjects[oid];
+    ObjectBase *obj = m_svcObjects[oid];
     if (obj)
     {
         QByteArray ba;

@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QElapsedTimer>
 #include "Protocol/xoTypes.h"
+#include "Protocol/ObjectInfo.h"
 #include "Protocol/ONBPacket.h"
 #include "xotools_global.h"
 #include <QDebug>

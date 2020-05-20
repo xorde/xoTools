@@ -45,21 +45,23 @@ public:
     //! @details Enumeration values are compatible to Qt's QVariant / QMetaType
     typedef enum
     {
+        UnknownType = 0,    //!< not initialized type
+
         Void = 43,      //!< empty type, size = 0
         Bool = 1,       //!< boolean value, size = 1 byte, stored value can be 0 or 1
-        Int = 2,        //!< 32-bit signed integer value
-        UInt = 3,       //!< 32-bit unsigned integer value
-        LongLong = 4,   //!< 64-bit signed integer value
-        ULongLong = 5,  //!< 64-bit unsigned integer value
+        Integer = 2,        //!< 32-bit signed integer value
+        UInteger = 3,       //!< 32-bit unsigned integer value
+//        LongLong = 4,   //!< 64-bit signed integer value
+//        ULongLong = 5,  //!< 64-bit unsigned integer value
         Double = 6,     //!< 64-bit double precision floating-point value
-        Long = 32,      //!< 32-bit signed integer value
-        Short = 33,     //!< 16-bit signed integer value
+//        Long = 32,      //!< 32-bit signed integer value
+//        Short = 33,     //!< 16-bit signed integer value
         Char = 34,      //!< 8-bit signed integer value or character
-        ULong = 35,     //!< 32-bit unsigned integer value
-        UShort = 36,    //!< 16-bit unsigned integer value
-        UChar = 37,     //!< 8-bit unsigned integer value
+//        ULong = 35,     //!< 32-bit unsigned integer value
+//        UShort = 36,    //!< 16-bit unsigned integer value
+//        UChar = 37,     //!< 8-bit unsigned integer value
         Float = 38,     //!< 32-bit single precision floating-point value
-        SChar = 40,     //!< 8-bit signed integer value
+//        SChar = 40,     //!< 8-bit signed integer value
 
         String = 10,    //!< string encoded in UTF-8 format
         Common = 12,    //!< common value of arbitrary type, can be fixed-size or variable-size, represented as byte array
@@ -171,30 +173,6 @@ protected:
         m_description.group = group;
     }
 
-    template<typename T> static int sizeOfVar(T &) {return sizeof(T);}
-    static int sizeOfVar(QString &) {return 0;}
-    static int sizeOfVar(QByteArray &) {return 0;}
-    static int sizeOfVar(QVariant &) {return 0;}
-
-    template<typename T> static Type typeOfVar(T &) {return Common;}
-    static Type typeOfVar(bool &) {return Bool;}
-//    static Type typeOfVar(int &) {return Int;}
-//    static Type typeOfVar(unsigned int &) {return UInt;}
-    static Type typeOfVar(int64_t &) {return LongLong;}
-    static Type typeOfVar(uint64_t &) {return ULongLong;}
-    static Type typeOfVar(double &) {return Double;}
-    static Type typeOfVar(int32_t &) {return Long;}
-    static Type typeOfVar(int16_t &) {return Short;}
-    static Type typeOfVar(char &) {return Char;}
-    static Type typeOfVar(uint32_t &) {return ULong;}
-    static Type typeOfVar(uint16_t &) {return UShort;}
-    static Type typeOfVar(uint8_t &) {return UChar;}
-    static Type typeOfVar(float &) {return Float;}
-    static Type typeOfVar(int8_t &) {return SChar;}
-    static Type typeOfVar(QString &) {return String;}
-    static Type typeOfVar(QByteArray &) {return Common;}
-    static Type typeOfVar(QVariant &) {return Variant;}
-
     friend class ComponentBase;
     friend class ComponentProxyONB;
 
@@ -226,23 +204,21 @@ template<typename T>
 class xoObjectBase : public virtual ObjectBase
 {
 public:
-    xoObjectBase() : m_value(0), m_ptr(&m_value)
+    xoObjectBase() : m_value(std::is_fundamental_v<T>? 0: T()), m_ptr(&m_value)
     {
-        m_description.size = sizeOfVar(m_value);
-        m_description.type = typeOfVar(m_value);
+        fillDescription();
     }
     xoObjectBase(const T &copyval) : m_value(copyval), m_ptr(&m_value)
     {
-        m_description.size = sizeOfVar(m_value);
-        m_description.type = typeOfVar(m_value);
+        fillDescription();
     }
     T &value() {return *m_ptr;}
     const T &value() const {return *m_ptr;}
     operator T&() {return *m_ptr;}
     operator const T&() const {return *m_ptr;}
 
-    T *operator &() {return m_ptr;}
-    const T *operator&() const {return m_ptr;}
+    T *operator &() {return &m_value;}
+    const T *operator&() const {return &m_value;}
 
     void operator =(const T &v)
     {
@@ -338,6 +314,8 @@ protected:
         m_step = other.m_step;
     }
 
+//    Type typeId() const {return UnknownType;}
+
 private:
     void doRead(QByteArray &ba, const T *ptr)
     {
@@ -346,20 +324,44 @@ private:
 
     bool doWrite(const QByteArray &ba, T *ptr)
     {
+        bool changed = false;
+        int sz = m_description.size < ba.size()? m_description.size: ba.size();
         if (ba.size() != m_description.size)
+        {
+            if (m_description.type == UInteger)
+                *ptr = 0;
+            else if (m_description.type == Integer)
+                *ptr = ba.back() & 0x80? -1: 0;
+            else
             return false;
-        bool changed = memcmp(ptr, ba.data(), ba.size());
-        memcpy(ptr, ba.data(), static_cast<size_t>(ba.size()));
+        }
+        changed = memcmp(ptr, ba.data(), sz);
+        memcpy(ptr, ba.data(), sz);
         return changed;
     }
+
+    void fillDescription()
+    {
+        m_description.size = sizeof(T);
+        m_description.type = Common;
+        if (std::is_integral_v<T>)
+{
+            if (std::is_unsigned_v<T>)
+                m_description.type = UInteger;
+            else
+                m_description.type = Integer;
+        }
+}
 };
 
-template<>
-xoObjectBase<QString>::xoObjectBase() :
-    m_ptr(&m_value)
-{
-    m_description.type = String;
-}
+template<> void xoObjectBase<bool>::fillDescription() {m_description.size = sizeof(bool); m_description.type = Bool;}
+//template<> void xoObjectBase<int>::fillDescription() {m_description.size = 4; m_description.type = Int;}
+//template<> void xoObjectBase<unsigned int>::fillDescription() {m_description.size = 4; m_description.type = UInt;}
+template<> void xoObjectBase<double>::fillDescription() {m_description.size = sizeof(double); m_description.type = Double;}
+template<> void xoObjectBase<float>::fillDescription() {m_description.size = sizeof(float); m_description.type = Float;}
+template<> void xoObjectBase<QString>::fillDescription() {m_description.size = 0; m_description.type = String;}
+template<> void xoObjectBase<QByteArray>::fillDescription() {m_description.size = 0; m_description.type = Common;}
+template<> void xoObjectBase<QVariant>::fillDescription() {m_description.size = 0; m_description.type = Variant;}
 
 template<>
 void xoObjectBase<QString>::doRead(QByteArray &ba, const QString *ptr)
@@ -578,7 +580,7 @@ public:
     template<typename... Args>
     xoObject<T> &enumeration(QString s, Args... a)
     {
-        xoObjectBase<T>::m_enum << s;
+        this->m_enum << s;
         return enumeration(a...);
     }
 
@@ -591,8 +593,17 @@ public:
     xoObject<T> &enumeration(QStringList list)
     {
         for (auto item: list)
-            xoObjectBase<T>::m_enum << item;
+            this->m_enum << item;
         return enumeration();
+    }
+
+private:
+    xoObject<T> &enumeration()
+    {
+        min(static_cast<T>(0));
+        max(static_cast<T>(this->m_enum.count() - 1));
+        setExtFlag(ObjectBase::MV_Enum);
+        return *this;
     }
 };
 

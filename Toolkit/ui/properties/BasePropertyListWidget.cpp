@@ -97,7 +97,7 @@ void BasePropertyListWidget::setFocusAt(int index)
 
 void BasePropertyListWidget::setFocusAt(QString propertyName)
 {
-     setFocusAt(getWidgetInfo(propertyName));
+    setFocusAt(getWidgetInfo(propertyName));
 }
 
 #include <QTimer>
@@ -170,7 +170,7 @@ BasePropertyView *BasePropertyListWidget::getPropertyView(AbstractMetaDescriptio
         else if (property->specialType.contains("Multiline", Qt::CaseInsensitive))
         {
             columnSpan = 2;
-           return new MultilinePropertyView(property, this);
+            return new MultilinePropertyView(property, this);
         }
         else if (property->specialType.compare("Slider", Qt::CaseInsensitive) == 0)
         {

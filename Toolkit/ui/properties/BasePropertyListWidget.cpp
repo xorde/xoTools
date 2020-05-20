@@ -150,9 +150,13 @@ void BasePropertyListWidget::addPropertyToLayout(AbstractMetaDescription *proper
     m_items << info;
 }
 
+#include <QDebug>
+
 BasePropertyView *BasePropertyListWidget::getPropertyView(AbstractMetaDescription *property, int &columnSpan)
 {
     auto type = property->typeName;
+
+    //qDebug() << "Creating prop for" << property->typeId << property->name << property->typeName;
 
     columnSpan = 1;
 
@@ -181,10 +185,9 @@ BasePropertyView *BasePropertyListWidget::getPropertyView(AbstractMetaDescriptio
             return new EnumStringListPropertyView(property, this);
         }
     }
-    if (property->isEnumType())
-        return new EnumPropertyView(property, this);
+    if (property->isEnumType()) return new EnumPropertyView(property, this);
     if (type.contains("bool")) return new BoolPropertyView(property, this);
-    if (type.contains("int")) return new IntPropertyView(property, this);
+    if (type.contains("int") || type.contains("long")) return new IntPropertyView(property, this);
     if (type.contains("QDate")) return new DatePropertyView(property, this);
     if (type.contains("QDateTime")) return new DatePropertyView(property, this);
     if (type.contains("double") || type.contains("float")) return new DoublePropertyView(property, this);

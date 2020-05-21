@@ -158,12 +158,13 @@ const ObjectBase *ComponentBase::object(QString name) const
     return m_objectMap.value(name, nullptr);
 }
 
-void ComponentBase::touchOutput(QString name, bool notifyAnyway)
+void ComponentBase::touchOutput(QString name)//, bool notifyAnyway)
 {
+    qDebug() << "[ComponentBase]" << name << "touched";
     ObjectBase *obj = m_objectMap.value(name, nullptr);
     if (obj)
     {
-        if (!obj->m_autoPeriodMs || notifyAnyway)
+        if (!obj->m_autoPeriodMs)// || notifyAnyway)
         {
             QByteArray ba;
             obj->read(ba);
@@ -193,6 +194,8 @@ unsigned char ComponentBase::bindSvcObject(QString name, ObjectBase &obj, Object
 
 unsigned char ComponentBase::bindObject(ObjectBase &obj)
 {
+    obj.m_component = this;
+
     m_objects << &obj;
     obj.setId(m_objects.size() - 1);
     m_objectMap[obj.name()] = &obj;

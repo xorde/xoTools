@@ -12,9 +12,8 @@ SOURCES += \
     ModuleBaseONB.cpp \
     ModuleBaseAppONB.cpp \
     ModuleBaseLibONB.cpp \
+    Protocol/ObjectBase.cpp \
     Protocol/objectdescription.cpp \
-    Protocol/ObjectInfo.cpp \
-    Protocol/onbobject.cpp \
     ComponentBase.cpp \
     Toolkit/AbstractSettings.cpp \
     Toolkit/network/WebSocket/WebSocketClient.cpp \
@@ -64,6 +63,11 @@ SOURCES += \
 
 
 HEADERS += \
+    Protocol/ObjectBase.h \
+    Protocol/xoImage.h \
+    Protocol/xoObject.h \
+    Protocol/xoObjectBase.h \
+    Protocol/xoTypes.h \
     xotools_global.h \
     Protocol/ONBPacket.h \
     Protocol/ONBCommon.h \
@@ -72,8 +76,6 @@ HEADERS += \
     ModuleBaseLibONB.h \
     ComponentBase.h \
     Protocol/objectdescription.h \
-    Protocol/ObjectInfo.h \
-    Protocol/onbobject.h \
     Toolkit/AbstractSettings.h \
     Toolkit/network/WebSocket/WebSocketClient.h \
     Toolkit/network/WebSocket/WebSocketServer.h \

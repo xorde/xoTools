@@ -9,7 +9,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QElapsedTimer>
-#include "Protocol/ObjectInfo.h"
+#include "Protocol/xoTypes.h"
 #include "Protocol/ONBPacket.h"
 #include "xotools_global.h"
 #include <QDebug>
@@ -228,6 +228,7 @@ protected:
         {
             int oid = oldObj->description().id;
             obj.copyInfoFrom(*oldObj);
+            obj.m_component = this;
             m_objects[oid] = &static_cast<ObjectBase&>(obj);
             m_objectMap[name] = &static_cast<ObjectBase&>(obj);
             sendObjectInfo(oid);
@@ -254,14 +255,6 @@ protected:
     //! @details If the object with given name does not exist the method does nothing.
     //! @param name The name of the object.
     void sendObject(QString name);
-
-    //! @brief Make the object ready to send.
-    //! @details The object will be sent as soon as its next sampling interval has come.
-    //! The object is sent immediately if the sampling interval is set to special value of zero.
-    //! If the object with given name does not exist the method does nothing.
-    //! @param name The name of the object.
-    //! @param notifyAnyway Maybe it's better to use sendObject()?
-    void touchOutput(QString name, bool notifyAnyway = false);
 
     //! @brief Component creation event.
     //! @details It is called when component is created by core.
@@ -318,6 +311,16 @@ private:
 
     //! create binding for service object
     unsigned char bindSvcObject(QString name, ObjectBase &obj, ObjectBase::Flags flags);
+
+    //! @brief Make the object ready to send.
+    //! @details The object will be sent as soon as its next sampling interval has come.
+    //! The object is sent immediately if the sampling interval is set to special value of zero.
+    //! If the object with given name does not exist the method does nothing.
+    //! @param name The name of the object.
+    //! @param notifyAnyway Maybe it's better to use sendObject()?
+    void touchOutput(QString name);//, bool notifyAnyway = false);
+
+    friend class ObjectBase; // DIRTY HACK
 
     void parseServiceMessage(unsigned char oid, const QByteArray &data);
     void parseGlobalServiceMessage(unsigned char aid);

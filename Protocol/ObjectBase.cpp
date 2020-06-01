@@ -11,7 +11,8 @@ ObjectBase::ObjectBase() :
 
 ObjectBase::~ObjectBase()
 {
-
+    if (m_component)
+        m_component->deleteObject(name()); // more dirty HACK
 }
 
 bool ObjectBase::read(QByteArray &ba)

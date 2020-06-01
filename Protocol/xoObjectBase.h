@@ -91,7 +91,7 @@ protected:
           case MV_Hint: m_hint = QString::fromUtf8(ba.constData()); break;
           case MV_Unit: m_unit = QString::fromUtf8(ba.constData()); break;
           case MV_Options: m_options = QString::fromUtf8(ba.constData()); break;
-          case MV_RMIP: m_RMIP = *reinterpret_cast<const int32_t*>(ba.constData()); break;
+          case MV_RMIP: m_RMIP = *reinterpret_cast<const int32_t*>(ba.constData()); m_needTimestamp = m_RMIP > 0; break;
           case MV_Enum: m_enum = QString::fromUtf8(ba.constData()).split(","); break;
         }
         return true;

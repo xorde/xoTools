@@ -281,7 +281,7 @@ void ComponentBase::parseServiceMessage(unsigned char oid, const QByteArray &dat
       case svcObjectHint:
       case svcObjectUnit:
       case svcObjectOptions:
-//      case svcObjectExtInfo:
+      case svcObjectRMIP:
       case svcObjectEnum:
       {
         unsigned char _oid = data[0];

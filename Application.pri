@@ -3,19 +3,20 @@ TEMPLATE = app
 QT *= core
 DESTDIR = $$join(DESTDIR,,,/xoModules/$$NAME)
 
-win32: EXTENSION = .exe
-win32: XO_TOOLS_EXTENSION = .dll
-
-win32: CONFIG(debug, debug|release): SUFFIX = d
-
 win32:{
+    EXTENSION = .exe
+    XO_TOOLS_EXTENSION = .dll
+    CONFIG(debug, debug|release): SUFFIX = d
+
     equals(TEMPLATE, "app") : EXTENSION = .exe
     equals(TEMPLATE, "lib") : EXTENSION = .dll
     QMAKE_POST_LINK += xcopy /Y $$shell_path($${DESTDIR}/../../xoTools$${SUFFIX}$${XO_TOOLS_EXTENSION}) $$shell_path($${DESTDIR}/) &
 
-
     DEPLOY_COMMAND = windeployqt
-    QMAKE_POST_LINK += windeployqt $${DESTDIR}/$${TARGET}$${EXTENSION} &
+
+    QMAKE_POST_LINK += $${DEPLOY_COMMAND} $${DESTDIR}/$${TARGET}$${EXTENSION} &
+    QMAKE_POST_LINK += $${DEPLOY_COMMAND} $${DESTDIR}/xoTools$${SUFFIX}$${XO_TOOLS_EXTENSION} &
+
 }
 
 macx:{
@@ -24,3 +25,5 @@ macx:{
 
     DEPLOY_COMMAND = macdeployqt
 }
+
+

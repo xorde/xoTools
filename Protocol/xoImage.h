@@ -15,7 +15,7 @@ template<>
 void xoObjectBase<QImage>::doRead(QByteArray &ba, const QImage *p_image)
 {
     QBuffer writer(&ba);
-    writer.open(QIODevice::WriteOnly);
+    writer.open(QIODevice::Append);
     p_image->save(&writer, "jpg");
     writer.close();
 }

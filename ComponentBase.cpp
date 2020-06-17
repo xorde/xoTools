@@ -37,10 +37,10 @@ ComponentBase::ComponentBase(QString name, QString description, QObject *parent)
 ComponentBase::~ComponentBase()
 {
     //qDebug() << "[ComponentBase] deleted" << componentName;
-    for (ObjectBase *obj: m_objects)
-        delete obj;
-    for (ObjectBase *obj: m_svcObjects)
-        delete obj;
+//    for (ObjectBase *obj: m_objects)
+//        delete obj;
+//    for (ObjectBase *obj: m_svcObjects)
+//        delete obj;
 }
 
 uint32_t ComponentBase::timestamp() const
@@ -337,7 +337,8 @@ void ComponentBase::parseServiceMessage(unsigned char oid, const QByteArray &dat
                             {
                                 uint32_t timestamp = m_timestampTimer? m_timestampTimer->elapsed(): 0;
                                 QByteArray ba;
-                                ba.append(reinterpret_cast<const char*>(&_oid), sizeof(unsigned char));
+                                //ba.append(reinterpret_cast<const char*>(&_oid), sizeof(unsigned char));
+                                ba.append(_oid);
                                 ba.append('\0'); // reserved byte
                                 ba.append(reinterpret_cast<const char*>(&timestamp), sizeof(uint32_t));
                                 obj->m_timestamp = timestamp;

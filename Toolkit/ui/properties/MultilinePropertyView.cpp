@@ -6,6 +6,7 @@ MultilinePropertyView::MultilinePropertyView(AbstractMetaDescription *descriptio
 
     connect(txt, &QPlainTextEdit::textChanged, this, [description, this]()
     {
+        if (description->isReadOnly) return;
         description->setValue(QVariant(txt->toPlainText()));
     }, Qt::QueuedConnection);
 

@@ -11,7 +11,7 @@ BasePropertyView::BasePropertyView(AbstractMetaDescription *description, QWidget
     layout->setSpacing(2);
     layout->setColumnStretch(0, 100);
 
-    if (description->hasDefault && description->showDefault)
+    if (description->hasDefault && description->showDefault && !description->isReadOnly)
     {
          defaultButton = new QPushButton(this);
          defaultButton->setFixedSize(10, 10);

@@ -15,7 +15,11 @@ IntPropertyView::IntPropertyView(AbstractMetaDescription *description, QWidget *
     if (!description->prefix.isEmpty())
     spinBox->setPrefix(QCoreApplication::translate("Generic",description->prefix.toLatin1().data()));
 
-    connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), [description](int value){ description->setValue(QVariant(value)); });
+    connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), [description](int value)
+    {
+        if (description->isReadOnly) return;
+        description->setValue(QVariant(value));
+    });
 
     layout->addWidget(spinBox, 0, 0);
 

@@ -7,6 +7,8 @@ BoolPropertyView::BoolPropertyView(AbstractMetaDescription *description, QWidget
 
     connect(box, &QCheckBox::stateChanged, [description](int value)
     {
+        if (description->isReadOnly) return;
+
         description->setValue(QVariant(value > 0));
     });
 

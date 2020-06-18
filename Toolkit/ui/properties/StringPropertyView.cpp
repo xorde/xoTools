@@ -9,6 +9,8 @@ StringPropertyView::StringPropertyView(AbstractMetaDescription *description, QWi
 
     m_connections << connect(lineEdit, &QLineEdit::textChanged, this, [=]()
     {
+        if (description->isReadOnly) return;
+
         if (lineEdit)
         description->setValue(QVariant(lineEdit->text()));
     }, Qt::QueuedConnection);

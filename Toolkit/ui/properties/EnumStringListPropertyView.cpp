@@ -38,7 +38,7 @@ EnumStringListPropertyView::EnumStringListPropertyView(AbstractMetaDescription *
     {
         connect(box, QOverload<int>::of(&QComboBox::currentIndexChanged), [description](int index)
         {
-
+            if (description->isReadOnly) return;
             description->setValue(index);
         });
     }
@@ -46,6 +46,7 @@ EnumStringListPropertyView::EnumStringListPropertyView(AbstractMetaDescription *
     {
         connect(box, &QComboBox::currentTextChanged, [description](const QString &text)
         {
+            if (description->isReadOnly) return;
             description->setValue(text);
         });
     }

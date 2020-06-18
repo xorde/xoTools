@@ -54,6 +54,7 @@ public slots:
     virtual void setDefault() = 0;
     virtual void valueChangedSlot() = 0;
     virtual bool setTextValue(QString value) = 0;
+    virtual void setIsReadOnly(bool isReadOnly);
 
 signals:
     void valueChanged(QVariant value);

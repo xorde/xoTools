@@ -15,7 +15,11 @@ DoublePropertyView::DoublePropertyView(AbstractMetaDescription *description, QWi
     if (!description->prefix.isEmpty())
     spinBox->setPrefix(QCoreApplication::translate("Generic",description->prefix.toLatin1().data()));
 
-    connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [description](double value){ description->setValue(QVariant(value)); });
+    connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [description](double value)
+    {
+        if (description->isReadOnly) return;
+        description->setValue(QVariant(value));
+    });
 
     layout->addWidget(spinBox, 0, 0);
 

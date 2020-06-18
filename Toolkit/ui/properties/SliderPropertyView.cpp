@@ -28,8 +28,15 @@ SliderPropertyView::SliderPropertyView(AbstractMetaDescription *description, QWi
 
     layout->addWidget(widgetHolder, 0, 0, 1, 1, Qt::AlignLeft);
 
-    connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), [description](int value){ description->setValue(value); });
-    connect(slider, &QSlider::valueChanged, [description](int value) { description->setValue(value); });
+    connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), [description](int value){
+        if (description->isReadOnly) return;
+        description->setValue(value);
+    });
+    connect(slider, &QSlider::valueChanged, [description](int value)
+    {
+        if (description->isReadOnly) return;
+        description->setValue(value);
+    });
 
     metaValueChanged(description->getValue());
 }

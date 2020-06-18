@@ -19,7 +19,11 @@ EnumPropertyView::EnumPropertyView(AbstractMetaDescription *description, QWidget
         if (description->getValue().value<int>() == value) comboIndex = i;
     }
     box->setCurrentIndex(comboIndex);
-    connect(box, QOverload<int>::of(&QComboBox::currentIndexChanged), [description](int index){ description->setValue(QVariant(description->enumerator().value(index))); });
+    connect(box, QOverload<int>::of(&QComboBox::currentIndexChanged), [description](int index)
+    {
+        if (description->isReadOnly) return;
+        description->setValue(QVariant(description->enumerator().value(index)));
+    });
 
     layout->addWidget(box, 0, 0);
 

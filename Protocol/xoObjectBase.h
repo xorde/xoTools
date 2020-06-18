@@ -16,6 +16,12 @@ public:
     {
         fillDescription();
     }
+
+    void operator =(const xoObjectBase<T> &other)
+    {
+        *m_ptr = *other.m_ptr;
+    }
+
     T &value() {return *m_ptr;}
     const T &value() const {return *m_ptr;}
     operator T&() {return *m_ptr;}

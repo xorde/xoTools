@@ -3,6 +3,9 @@
 
 #include "xoObjectBase.h"
 
+#undef min
+#undef max
+
 using namespace std::chrono_literals;
 
 template <typename T>
@@ -17,10 +20,6 @@ public:
     xoObject(const T &value) : xoObjectBase<T>(value) {}
 
     void operator =(const T &v) {xoObjectBase<T>::operator=(v);}
-//    {
-//        *m_ptr = v;
-//        setEvent();
-//    }
 
     //! @brief Set the minimum value of the object.
     //! @attention This meta-value is only for information and does not apply to the variable.

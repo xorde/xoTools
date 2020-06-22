@@ -1,10 +1,10 @@
 #ifndef GLOBALCONSOLE_H
 #define GLOBALCONSOLE_H
 
+#include <QMap>
 #include <QObject>
 #include <QDateTime>
 #include <QCoreApplication>
-#include <QDebug>
 
 #ifdef VLD
 #include <vld.h>

@@ -74,18 +74,8 @@ public:
     } MetaValue;
 
     ObjectBase();
-
-//    //! @brief Construct Object with given description.
-//    //! @param desc Description received from component
-//    ObjectBase(const ObjectDescription &desc) :
-//        id(m_description.id), RMIP(m_RMIP), timestamp(m_timestamp),
-//        m_description(desc),
-//        m_changed(false), m_needTimestamp(false), m_RMIP(0), m_autoPeriodMs(0), m_timestamp(0)
-//    {
-//    }
-
     ObjectBase(const ObjectBase &) = delete; //important! don't remove this line!!
-    void operator =(const ObjectBase &) = delete; //important! don't remove this line!!
+    ObjectBase& operator =(const ObjectBase &) = delete; //important! don't remove this line!!
     virtual ~ObjectBase();
 
     bool read(QByteArray &ba);

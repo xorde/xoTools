@@ -223,7 +223,6 @@ void GlobalConsole::_writeItem(QString message, const QString& type, const QDate
 
     message.prepend(date.toString("hh:mm:ss.zzz")+" ");
     emit newEntry(message);
-    qDebug() << message;
 }
 
 void GlobalConsole::_writeLine(QString text, QDateTime date)

@@ -9,7 +9,6 @@
 #include <QLabel>
 #include "clickablewidget.h"
 #include "ui/uihelper.h"
-#include <QDebug>
 #include "xotools_global.h"
 
 class XOTOOLSSHARED_EXPORT NListBox : public ContextableWidget

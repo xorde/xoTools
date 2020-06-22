@@ -8,7 +8,6 @@
 #include <QJsonArray>
 #include <QElapsedTimer>
 #include <QObject>
-#include <QDebug>
 
 //! @mainpage XORDE module development API
 //!

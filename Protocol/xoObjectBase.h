@@ -141,7 +141,6 @@ private:
         changed = memcmp(ptr, ba.data(), sz);
         if (ba.size() != m_description.size)
         {
-//            qDebug() << "[doWrite]: x3 size";
             if (m_description.type == UInteger)
                 *ptr = 0;
             else if (m_description.type == Integer)

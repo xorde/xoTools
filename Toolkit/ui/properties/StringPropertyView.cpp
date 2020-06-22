@@ -1,5 +1,4 @@
 #include "StringPropertyView.h"
-#include <QDebug>
 
 StringPropertyView::StringPropertyView(AbstractMetaDescription *description, QWidget *parent) : BasePropertyView(description, parent)
 {

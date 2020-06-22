@@ -1,6 +1,5 @@
 #include "nrectangle.h"
 #include <QPainter>
-#include <QDebug>
 
 NRectangle::NRectangle(QColor color, QWidget *parent) : QFrame(parent)
 {

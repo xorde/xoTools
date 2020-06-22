@@ -4,7 +4,6 @@
 #include <QObject>
 #include "ModuleBaseONB.h"
 #include "xotools_global.h"
-#include <QDebug>
 
 class XOTOOLSSHARED_EXPORT ModuleBaseLibONB : public ModuleBaseONB
 {

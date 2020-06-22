@@ -1,6 +1,5 @@
 #include "SliderPropertyView.h"
 #include <QCoreApplication>
-#include <QDebug>
 
 SliderPropertyView::SliderPropertyView(AbstractMetaDescription *description, QWidget *parent) : BasePropertyView(description, parent)
 {

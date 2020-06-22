@@ -1,7 +1,5 @@
 #include "objectdescription.h"
 
-#include <QDebug>
-
 ObjectDescriptionHeaderV2::ObjectDescriptionHeaderV2()
 {
     memset(this, 0, sizeof(ObjectDescriptionHeaderV2));

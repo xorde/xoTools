@@ -13,7 +13,6 @@
 #include "Protocol/ObjectInfo.h"
 #include "Protocol/ONBPacket.h"
 #include "xotools_global.h"
-#include <QDebug>
 #include <cmath>
 
 //! @brief The base for the ONB component.

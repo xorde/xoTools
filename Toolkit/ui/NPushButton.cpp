@@ -61,7 +61,6 @@ void NPushButton::setEnabledState(bool enabled)
     else disable();
 }
 
-#include <QDebug>
 bool NPushButton::eventFilter(QObject *, QEvent *event)
 {
     auto type = event->type();

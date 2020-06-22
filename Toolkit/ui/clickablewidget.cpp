@@ -1,6 +1,5 @@
 #include "clickablewidget.h"
 #include "uihelper.h"
-#include <QDebug>
 
 QColor ClickableWidget::HighlightColor = QColor("#3399ff");
 

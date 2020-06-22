@@ -1,5 +1,4 @@
 #include "metadescription.h"
-#include <QDebug>
 #include <QCoreApplication>
 #include <QRegExp>
 #include <QColor>
@@ -108,9 +107,6 @@ void MetaDescription::set(int metapropertyindex, QObject* object)
     QString stepString = stringForAlias("Step");
     if (!stepString.isNull()) hasStep = assignDouble(m_step, stepString);
 
-    //qDebug() << displayName << minString << maxString << stepString << hasStep;
-
-
     QString specialString = stringForAlias("SpecialType");
     if(!specialString.isNull())
     {
@@ -163,6 +159,7 @@ QMetaProperty MetaDescription::metaprop()
     return m_object->metaObject()->property(m_metaindex);
 }
 
+#include <QDebug>
 const QVariant MetaDescription::getValue()
 {
     try

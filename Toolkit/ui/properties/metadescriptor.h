@@ -4,7 +4,6 @@
 #include <QString>
 #include <QList>
 #include <QObject>
-#include <QDebug>
 
 #include <QAbstractListModel>
 #include "metadescription.h"

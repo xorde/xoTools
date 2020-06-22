@@ -1,6 +1,5 @@
 #include "ColorPropertyView.h"
 #include <QPainter>
-#include <QDebug>
 
 ColorPropertyView::ColorPropertyView(AbstractMetaDescription *description, QWidget *parent) : BasePropertyView(description, parent)
 {

@@ -1,7 +1,5 @@
 #include "apphelper.h"
 #include "texthelper.h"
-
-#include <QDebug>
 #include <QMessageBox>
 
 void AppHelper::quit()
@@ -111,7 +109,6 @@ QStringList AppHelper::getRunningApps()
             result << pr.trimmed();
         }
     }
-    //qDebug() << result;
     return result;
 }
 
@@ -123,7 +120,6 @@ bool AppHelper::isAppRunnning(QString appName)
 void AppHelper::closeApp(QString appName)
 {
     QProcess p;
-    //qDebug() << "taskkill /im "+appName+" /f";
     p.start("taskkill /im "+appName+" /f");
     p.waitForFinished();
 }

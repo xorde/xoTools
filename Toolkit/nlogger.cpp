@@ -2,7 +2,6 @@
 #include <QCoreApplication>
 #include <QStandardPaths>
 #include <QDateTime>
-#include <QDebug>
 #include "texthelper.h"
 
 FILE* NLogger::pFile = nullptr;

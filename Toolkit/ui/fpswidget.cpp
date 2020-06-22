@@ -1,5 +1,4 @@
 #include "fpswidget.h"
-#include <QDebug>
 #include <QGridLayout>
 
 FPSWidget::FPSWidget(FrameRateCounter *counter, QWidget *parent) : QWidget(parent)

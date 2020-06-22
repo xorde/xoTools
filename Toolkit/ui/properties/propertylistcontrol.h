@@ -1,7 +1,6 @@
 #ifndef PROPERTYLISTCONTROL_H
 #define PROPERTYLISTCONTROL_H
 
-#include <QDebug>
 #include <QWidget>
 #include "AbstractSettings.h"
 #include "metadescriptor.h"

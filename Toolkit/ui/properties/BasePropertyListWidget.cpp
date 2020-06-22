@@ -150,13 +150,9 @@ void BasePropertyListWidget::addPropertyToLayout(AbstractMetaDescription *proper
     m_items << info;
 }
 
-#include <QDebug>
-
 BasePropertyView *BasePropertyListWidget::getPropertyView(AbstractMetaDescription *property, int &columnSpan)
 {
     auto type = property->typeName;
-
-    //qDebug() << "Creating prop for" << property->typeId << property->name << property->typeName;
 
     columnSpan = 1;
 

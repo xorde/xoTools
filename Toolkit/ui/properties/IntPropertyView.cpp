@@ -1,5 +1,6 @@
 #include "IntPropertyView.h"
 #include <QCoreApplication>
+#include <QDebug>
 
 IntPropertyView::IntPropertyView(AbstractMetaDescription *description, QWidget *parent) : BasePropertyView(description, parent)
 {
@@ -13,7 +14,7 @@ IntPropertyView::IntPropertyView(AbstractMetaDescription *description, QWidget *
     spinBox->setSuffix(QCoreApplication::translate("Generic", description->suffix.toLatin1().data()));
 
     if (!description->prefix.isEmpty())
-    spinBox->setPrefix(QCoreApplication::translate("Generic",description->prefix.toLatin1().data()));
+    spinBox->setPrefix(QCoreApplication::translate("Generic", description->prefix.toLatin1().data()));
 
     connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [description](int value)
     {

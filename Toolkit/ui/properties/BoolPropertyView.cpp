@@ -35,10 +35,7 @@ void BoolPropertyView::nullifyEditor()
 
 void BoolPropertyView::metaValueChanged(QVariant value)
 {
-    if (box)
-    {
-        box->setChecked(value.toBool());
-    }
+    if (box) box->setChecked(value.toBool());
 
     setDefaultButtonChecked(value.toString() == description->m_def);
 }

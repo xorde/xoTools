@@ -72,8 +72,6 @@ PropertyListControl::PropertyListControl(AbstractSettings *source, QString viewO
                         checkVisibility(bindedProperty->getValue());
                     }
                 }
-
-
             }
 
             m_widgetLayout->setRowStretch(m_widgetLayout->rowCount(), 100);

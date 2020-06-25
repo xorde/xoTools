@@ -237,15 +237,11 @@ void ComponentBase::parseGlobalServiceMessage(unsigned char aid)
     switch (aid)
     {
       case aidPollNodes:
-//        if (!m_id)
-//            sendServiceMessage(svcHello);
-//        else
-            sendServiceMessage(svcEcho);
+        sendServiceMessage(svcEcho);
         break;
 
       case aidConnReset:
         m_id = 0;
-//        sendServiceMessage(svcEcho);
         break;
     }
 }

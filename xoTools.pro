@@ -131,3 +131,6 @@ DISTFILES += \
     Plugin.pri \
     xoTools.pri \
     Module.pri
+
+RESOURCES += \
+    images.qrc

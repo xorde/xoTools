@@ -9,7 +9,18 @@
 xoWindow::xoWindow(ModuleBaseAppONB *module, QWidget *parent) : QMainWindow(parent)
 {
     setWindowTitle(module->getName());
-    setWindowIcon(QIcon(module->getIcon()));
+
+    auto iconData = module->getIcon();
+    if (!iconData.isEmpty())
+    {
+        setWindowIcon(QIcon());
+    }
+    else
+    {
+        setWindowIcon(QIcon(":/module.svg"));
+    }
+
+
 
     m_module = module;
     m_module->tryConnect();

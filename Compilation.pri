@@ -41,6 +41,7 @@ win32: {
         equals(MSVC_VER, 13.0){ COMPILER = 'msvc2013' }
         equals(MSVC_VER, 14.0){ COMPILER = 'msvc2015' }
         equals(MSVC_VER, 15.0){ COMPILER = 'msvc2017' }
+        equals(MSVC_VER, 16.0){ COMPILER = 'msvc2019' }
     }
 }
 else { COMPILER = $$QMAKE_CXX }
